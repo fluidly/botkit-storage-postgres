@@ -14,6 +14,7 @@ module.exports = function (config) {
     port: config.port || process.env.BOTKIT_STORAGE_POSTGRES_PORT || '5432',
     max: config.maxClients || process.env.BOTKIT_STORAGE_POSTGRES_MAX_CLIENTS || '10',
     idleTimeoutMillis: config.idleTimeoutMillis || process.env.BOTKIT_STORAGE_POSTGRES_IDLE_TIMEOUT_MILLIS || '30000',
+    ssl: config.ssl || false
   };
 
   const promisedPool = co(function *() {
@@ -24,7 +25,7 @@ module.exports = function (config) {
     // Some providers don't allow access to template1.
     // Instead of failing hard, raise an error on the console, and attempt to connect to the database anyways.
     try {
-      const noDbClient = new pg.Client(Object.assign({}, config, {database: 'template1'}));
+      const noDbClient = new pg.Client(Object.assign({}, config, {database: config.database}));
       yield connect(noDbClient);
       const dbexistsQuery = yield q(noDbClient, `SELECT 1 from pg_database WHERE datname='${config.database}'`);
 
